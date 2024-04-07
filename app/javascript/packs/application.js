@@ -32,7 +32,8 @@ document.addEventListener('turbolinks:load', () => {
   const transformEditor = CodeMirror.fromTextArea(document.getElementById('transform-editor'), editorOptions);
   const outputEditor = CodeMirror.fromTextArea(document.getElementById('output-editor'), editorOptions);
   const astEditor = CodeMirror.fromTextArea(document.getElementById('ast-editor'), astEditorOptions);
-
+  const stdoutOutputEditor = CodeMirror.fromTextArea(document.getElementById('std-out-editor'), astEditorOptions);
+  window.stdoutOutputEditor = stdoutOutputEditor;
 
   function indentAll() {
     indentCode(editor);
@@ -40,43 +41,73 @@ document.addEventListener('turbolinks:load', () => {
     indentCode(outputEditor);
   }
 
+  function refreshCodeMirrror() {
+    setTimeout(() => {
+      console.log('Refreshing code mirror');
+      astEditor.refresh();
+      stdoutOutputEditor.refresh();
+    }, 1);
+  }
 
-  function updateAst(code, transform) {
+  function setSearchParams(newSearch) {
+    // Check if the URLSearchParams API is available
+    if (window.URLSearchParams) {
+      // Create a new URLSearchParams object based on the current URL
+      const searchParams = new URLSearchParams(window.location.search);
+      // Loop through the newSearch object and set new search parameters
+      Object.keys(newSearch).forEach((key) => {
+        searchParams.set(key, encodeURIComponent(newSearch[key]));
+      });
+
+      // Construct the new URL
+      const newUrl = `${window.location.pathname}?${searchParams.toString()}${window.location.hash}`;
+
+      // Use history.pushState to change the URL without refreshing the page
+      window.history.pushState({ path: newUrl }, '', newUrl);
+    } else {
+      console.error('URLSearchParams is not supported in this browser.');
+    }
+  }
+
+  function updateAstAndOutput(code, transform, shouldBuildTreeView) {
+    setSearchParams({ code, transform });
     $.ajax({
       url: '/ast',
       type: 'post',
       data: { code, transform },
       success(data) {
-        astEditor.setValue(data.ast);
-        buildTreeView(data.treeData);
         outputEditor.setValue(data.output);
+        stdoutOutputEditor.setValue(data.captured_stdout_output);
+
+        if (shouldBuildTreeView) {
+          astEditor.setValue(data.ast);
+          buildTreeView(data.treeData);
+        }
+
+        if (data.captured_stdout_output.length > 0) {
+          $('#stdout-tab').click();
+        }
       },
       error() {},
     });
   }
 
-  function updateOutput(code, transform) {
-    $.ajax({
-      url: '/ast',
-      type: 'post',
-      data: { code, transform },
-      success(data) {
-        outputEditor.setValue(data.output);
-      },
-      error() {},
-    });
+  const searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.get('code')) {
+    editor.setValue(decodeURIComponent(searchParams.get('code')));
+  }
+  if (searchParams.get('transform')) {
+    transformEditor.setValue(decodeURIComponent(searchParams.get('transform')));
   }
 
-
-  updateAst(editor.getValue(), transformEditor.getValue());
-
+  updateAstAndOutput(editor.getValue(), transformEditor.getValue(), true);
   indentAll();
-
+  setTimeout(refreshCodeMirrror, 1000);
 
   editor.on('change', debounce((cm) => {
     const code = cm.getValue();
     const transform = transformEditor.getValue();
-    updateAst(code, transform);
+    updateAstAndOutput(code, transform, true);
   }, 250));
 
   editor.on('cursorActivity', (e) => {
@@ -89,8 +120,6 @@ document.addEventListener('turbolinks:load', () => {
 
     const { line } = e.doc.getCursor(); // Cursor line
     const { ch } = e.doc.getCursor(); // Cursor character
-
-    console.log({ line, ch });
 
     const doc = editor.getDoc();
 
@@ -125,66 +154,10 @@ document.addEventListener('turbolinks:load', () => {
   transformEditor.on('change', debounce((cm) => {
     const transform = cm.getValue();
     const code = editor.getValue();
-    updateOutput(code, transform);
+    updateAstAndOutput(code, transform, false);
   }, 250));
 
-  $('#create-gist').click(function () {
-    const _self = this;
-    _self.disabled = true;
-    $.ajax({
-      url: '/gist',
-      type: 'post',
-      data: { code: editor.getValue(), transform: transformEditor.getValue() },
-      success(data) {
-        // window.alert(data.message);
-        // _self.disabled = false;
-        window.location = `/gist/${data.gist}`;
-      },
-      error(data) {
-        window.alert('Gist creation failed');
-        _self.disabled = false;
-      },
-    });
-  });
-
-  $('#update-gist').click(function () {
-    const _self = this;
-    _self.disabled = true;
-    const gistId = window.location.pathname.replace('/gist/', '');
-    $.ajax({
-      url: `/gist/${gistId}`,
-      type: 'put',
-      data: { code: editor.getValue(), transform: transformEditor.getValue() },
-      success(data) {
-        window.alert(data.message);
-        _self.disabled = false;
-      },
-      error(data) {
-        window.alert('Gist update failed');
-        _self.disabled = false;
-      },
-    });
-  });
-
-  $('#switch-theme').on('click', (e) => {
-    const theme = e.target.checked ? 'solarized dark' : 'solarized';
-    editor.setOption('theme', theme);
-    astEditor.setOption('theme', theme);
-    transformEditor.setOption('theme', theme);
-    outputEditor.setOption('theme', theme);
-
-    const $primarynav = document.getElementById('primary-nav');
-
-    if (e.target.checked) {
-      $primarynav.classList.replace('navbar-light', 'navbar-dark');
-      $primarynav.classList.replace('bg-light', 'bg-dark');
-      document.body.classList.add('dark-theme');
-    } else {
-      $primarynav.classList.replace('navbar-dark', 'navbar-light');
-      $primarynav.classList.replace('bg-dark', 'bg-light');
-      document.body.classList.remove('dark-theme');
-    }
-  });
+  $('a.nav-link').on('click', refreshCodeMirrror);
 
   $(document).on('mouseover', '[role="treeitem"]', (event) => {
     const { beginPos, endPos } = event.currentTarget.dataset;

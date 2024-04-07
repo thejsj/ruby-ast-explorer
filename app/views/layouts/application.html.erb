@@ -45,12 +45,12 @@
           <button id="update-gist" class="btn btn-secondary btn-sm mr-5"  type="button">Update gist</button>
         <% end %>
         <% if !session[:user_id]  %>
-          <a class="btn btn-link  mr-5" href="/auth/github" role="button" data-toggle="tooltip" data-placement="bottom" title="Please sign in to export your transforms as gist" >Sign in with Github</a>
+          <!--<a class="btn btn-link  mr-5" href="/auth/github" role="button" data-toggle="tooltip" data-placement="bottom" title="Please sign in to export your transforms as gist" >Sign in with Github</a>-->
         <% end %>
-          <div class="custom-control custom-switch custom-control-inline">
+          <!--<div class="custom-control custom-switch custom-control-inline">
             <input type="checkbox" class="custom-control-input" id="switch-theme">
             <label class="custom-control-label" for="switch-theme">Dark Theme</label>
-          </div>
+          </div>-->
         </form>
         <span class="navbar-text">
           Parser: <a href="https://github.com/whitequark/parser">parser 2.6.4.0</a>
@@ -67,8 +67,8 @@
     <% end %>
     <%= yield %>
     <footer>
-      <p>Built with 
-      <a href="https://rubyonrails.org/">Rails 5.2.3</a>, 
+      <p>Built with
+      <a href="https://rubyonrails.org/">Rails 5.2.3</a>,
       <a href="https://www.ruby-lang.org/en/">ruby 2.5.5p157</a> | <a href="https://github.com/rajasegar/ruby-ast-explorer">Github</a></p>
     </footer>
 

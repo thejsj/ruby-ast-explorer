@@ -52,13 +52,12 @@ Rails.application.configure do
   # Suppress logger output for asset requests.
   config.assets.quiet = true
 
+  config.web_console.permissions = '0.0.0.0/0'
+
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
-
-  ENV['GITHUB_KEY'] = '23b493911b3a796d843b'
-  ENV['GITHUB_SECRET'] = 'a10756c33d3a06cd3b534d2aa4bb6aff93fa14c3'
 end
