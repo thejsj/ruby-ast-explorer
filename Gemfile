@@ -18,6 +18,9 @@ gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 
+# Use CoffeeScript for .coffee assets and views
+gem 'coffee-rails', '~> 4.2'
+
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 gem 'turbolinks', '~> 5'
 
@@ -52,10 +55,16 @@ end
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
+# Used to parse Ruby and create ASTs
 gem 'parser'
+
+# jQuery
 gem 'jquery-rails'
+
+# DEPRECATED: Used to automatically created gists
 gem 'gist', git: 'https://github.com/rajasegar/gist.git', ref: '55c2247'
 gem 'omniauth-github'
 gem 'octokit'
 
+# Webpack
 gem 'webpacker', '~> 4.x'

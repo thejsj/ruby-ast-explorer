@@ -13,26 +13,6 @@ the same to do large scale refactorings with your ruby code base using tools lik
 $ codeshift -t transform.rb app/models/**/*.rb
 ```
 
-## Export as gist
-You can also export the source and transform code as gist to your Github account by clicking
-the `Export as gist` button. But before that you need to sign in with Github and give permission to create gists for this app named ruby-ast-explorer.
-
-
-And with that you can directly use the transform from your gist.
-```sh
-$ codeshift -t https://gist.githubusercontent.com/[user]/.../transform.rb  app/models/**/*.rb
-```
-
-It has got four panes with the following content:
-
-* Top-Left => Original Source Code
-* Top-Right => AST in Tree and S-expressions formats
-* Bottom-Left => Transform Class
-* Bottom-Right => Output
-
-![screenshot](https://github.com/rajasegar/ruby-ast-explorer/blob/master/public/screenshot.png)
-
-
 ## Reference:
 * https://whitequark.org/blog/2013/04/26/lets-play-with-ruby-code/
 * https://blog.arkency.com/using-ruby-parser-and-ast-tree-to-find-deprecated-syntax/
@@ -53,3 +33,12 @@ Inspired by [AST Explorer](https://astexplorer.net) by [Felix Kling](https://git
 * [Astrolabe](https://github.com/yujinakayama/astrolabe)
 * [codeshift](https://github.com/rajasegar/codeshift)
 * [cybertron](https://github.com/rajasegar/cybertron)
+
+## Differences from Source Repo
+
+- Removes all gist functionality (meant to be run locally)
+- Creates Dockerfile image in order to allow running locally
+- Allows printing in local transform and showing in UI
+- Fixes some minor CodeMirror issues
+- Removes some unused dependencies
+
